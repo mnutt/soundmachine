@@ -1,0 +1,57 @@
+.form-table label {
+  display: block;
+}
+.form-table .song-field {
+  background-color: #DDD;
+  margin-bottom: 1em;
+  padding: 1em;
+}
+.form-table .song-field input {
+  width: 100%;
+}
+.form-table .inline-table td {
+  padding: 0;
+}
+.form-table .inline-table button {
+  margin-top: 1.8em;
+}
+.form-table .inline-table .song-checkbox {
+  margin-top: 1.8em;
+  width: 120px;
+}
+.form-table .inline-table .song-checkbox input {
+  width: auto;
+}
+.form-table label {
+  display: inline;
+}
+.form-table .inline-table .album_cover_preview {
+  width: 30px;
+  position: relative;
+}
+.form-table .inline-table .album_cover_preview .preview_wrapper {
+  position: relative;
+}
+.form-table .inline-table .album_cover_preview img {
+  position:absolute;
+  top: 0;
+  left: 0;
+  width: 24px;
+  height: 24px;
+}
+.form-table .inline-table .album_cover_preview img:hover {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: auto;
+  height: auto;
+  border: 2px solid #000;
+}
+#song-preview-box img {
+  float: left;
+  margin: 0 20px 0 0;
+}
+#song-preview-box p {
+  font-size: 1.8em;
+  font-weight: bold;
+}
