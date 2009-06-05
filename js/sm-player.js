@@ -194,6 +194,20 @@ jQuery(document).ready(function() {
     lwmbPlayer.play(track_position);
     return false;
   });
+
+  jQuery('.sm-player-popout').click(function() {
+    var href = "<?php echo get_option('siteurl'); ?>/wp-content/plugins/soundmachine/popout.php";
+    var idParam = "id="+smPlayer.selectedId();
+    var positionParam = "position="+smPlayer.position;
+    var stateParam = "state="+smPlayer.state();
+
+    href = href + "?" + idParam + "&" + positionParam + "&" + stateParam;
+    
+    smPlayer.stop();
+    window.open(href, "Music Player", 'width=190,height=250,scrollbars=no,toolbar=no,location=no,menubar=no,resizable=no,status=no,directories=no');
+    return false;
+  });
+
 });
 
 soundManager.onload = function() {

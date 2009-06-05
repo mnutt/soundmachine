@@ -38,7 +38,6 @@ if (!defined('WP_CONTENT_DIR')){
 
 $sm_dirname = dirname(__FILE__);
 
-//init the flash mp3 player widget
 function soundmachine_init() {
   if (!function_exists('register_sidebar_widget')) {
     return;
@@ -46,13 +45,14 @@ function soundmachine_init() {
 
   function soundmachine($args) {
     extract($args);
-    global $fmp_listfile_url;
     global $popout;
-    $options = get_option('soundmachine');
+    $options = get_option('sm_soundmachine');
     $properties = get_option('sm_properties');
     $songs = get_option('sm_songs');
     $title = htmlspecialchars(stripslashes($options['title']));	
+
     if (!$popout) echo $before_widget.$before_title.$title.$after_title;
+
     $base_name = WP_CONTENT_URL . '/plugins/soundmachine';
     ?>
     
@@ -69,23 +69,6 @@ function soundmachine_init() {
       <span class="sm-player-next">Next</span>
       <span class="sm-player-download-wrapper"></span>
       <span class="sm-player-volume"></span>
-      <?php if ( !$popout ) { ?>
-        <span class="sm-player-popout"><a href="#">Pop out</a></span>
-      <?php } ?>
-      
-      <script type="text/javascript">
-        jQuery('.sm-player-popout').click(function() {
-          var href = "<?php echo get_option('siteurl'); ?>/wp-content/plugins/soundmachine/popout.php";
-          var idParam = "id="+smPlayer.selectedId();
-          var positionParam = "position="+smPlayer.position;
-          var stateParam = "state="+smPlayer.state();
-          href = href + "?" + idParam + "&" + positionParam + "&" + stateParam;
-          smPlayer.stop();
-	  window.open(href, "Music Player", 'width=190,height=250,scrollbars=no,toolbar=no,location=no,menubar=no,resizable=no,status=no,directories=no');
-          return false;
-        });
-
-      </script>
 
       <?php if($popout) { ?>
         <script type="text/javascript">
@@ -99,6 +82,8 @@ function soundmachine_init() {
           var popout_player_position = query['position'];
 	  var popout_player_state = query['state'];
         </script>
+      <?php } else { ?>
+        <span class="sm-player-popout"><a href="#">Pop out</a></span>
       <?php } ?>
 	  
 
@@ -108,9 +93,14 @@ function soundmachine_init() {
 
           if( !empty($songs) ) {
 	    foreach($songs as $song) {
-              ?>
+            ?>
               <li>
-                <a class="sm-player-song <?php if($song['show_download']) echo 'can-download'; ?>" data-link="<?php echo $song['buy_link']; ?>" data-cover="<?php echo $song['album_cover']; ?>" href="<?php echo $song['path']; ?>"><?php echo stripslashes($song['title']); ?></a>
+                <a class="sm-player-song <?php if($song['show_download']) echo 'can-download'; ?>" 
+                   data-link="<?php echo $song['buy_link']; ?>" 
+                   data-cover="<?php echo $song['album_cover']; ?>" 
+                   href="<?php echo $song['path']; ?>">
+                     <?php echo stripslashes($song['title']); ?>
+                 </a>
               </li>
 	    <?php
             }
@@ -133,36 +123,37 @@ function soundmachine_init() {
     </script>
 
     <?php
-      echo $after_widget;
-    }
+    echo $after_widget;
+  }
 
-    function soundmachine_options() {
-      $options = get_option('soundmachine');
-      if (!is_array($options)) {
-	$options = array('title' => __('Flash MP3 Player','fmp'), 'width' => 177, 'height' => 280);
-      }
-      if ($_POST['fmp-submit']) {
-	$options['title'] = strip_tags($_POST['fmp-title']);
-	$options['width'] = intval($_POST['fmp-width']);
-	$options['height'] = intval($_POST['fmp-height']);
-	update_option('soundmachine', $options);
-      }
-      echo '<p style="text-align: left;"><label for="fmp-title">';
-      _e('Title: ','fmp');
-      echo '</label><input type="text" id="fmp-title" name="fmp-title" value="'.htmlspecialchars(stripslashes($options['title'])).'" /></p>'."\n";
-      echo '<p style="text-align: left;"><label for="fmp-width">';
-      _e('Width: ','fmp');
-      echo '</label><input type="text" id="fmp-width" name="fmp-width" value="'.intval($options['width']).'" size="3" /></p>'."\n";
-      echo '<p style="text-align: left;"><label for="fmp-height">';
-      _e('Height: ','fmp');
-      echo '</label><input type="text" id="fmp-height" name="fmp-height" value="'.intval($options['height']).'" size="3" /></p>'."\n";
-      echo '<input type="hidden" id="fmp-submit" name="fmp-submit" value="1" />'."\n";
+  function soundmachine_options() {
+    $options = get_option('soundmachine');
+    if (!is_array($options)) {
+      $options = array('title' => __('Flash MP3 Player','fmp'), 'width' => 177, 'height' => 280);
     }
-	
-    $widget_ops =  array('classname' => 'soundmachine', 'description' => __( 'Display a flash made MP3 Player.', 'fmp'));
-    // Register Widgets
-    wp_register_sidebar_widget('flash_mp3player', __('MP3 Player','fmp'), 'soundmachine', $widget_ops);
-    wp_register_widget_control('flash_mp3player', __('MP3 Player','fmp'), 'soundmachine_options', 400, 200);
+    if ($_POST['fmp-submit']) {
+      $options['title'] = strip_tags($_POST['fmp-title']);
+      $options['width'] = intval($_POST['fmp-width']);
+      $options['height'] = intval($_POST['fmp-height']);
+      update_option('soundmachine', $options);
+    }
+    echo '<p style="text-align: left;"><label for="fmp-title">';
+    _e('Title: ','fmp');
+    echo '</label><input type="text" id="fmp-title" name="fmp-title" value="'.htmlspecialchars(stripslashes($options['title'])).'" /></p>'."\n";
+    echo '<p style="text-align: left;"><label for="fmp-width">';
+    _e('Width: ','fmp');
+    echo '</label><input type="text" id="fmp-width" name="fmp-width" value="'.intval($options['width']).'" size="3" /></p>'."\n";
+    echo '<p style="text-align: left;"><label for="fmp-height">';
+    _e('Height: ','fmp');
+    echo '</label><input type="text" id="fmp-height" name="fmp-height" value="'.intval($options['height']).'" size="3" /></p>'."\n";
+    echo '<input type="hidden" id="fmp-submit" name="fmp-submit" value="1" />'."\n";
+  }
+        
+  $widget_ops =  array('classname' => 'soundmachine', 
+                       'description' => __( 'Flash MP3 player.', 'sm'));
+  // Register Widgets
+  wp_register_sidebar_widget('soundmachine', __('MP3 Player','sm'), 'soundmachine', $widget_ops);
+  wp_register_widget_control('soundmachine', __('MP3 Player','sm'), 'soundmachine_options', 400, 200);
 }
 
 add_action('plugins_loaded','soundmachine_init');
@@ -188,18 +179,20 @@ function sm_initRoles()
   }
 }
 
-function sm_adminMenu()
-{
-  add_options_page( __('SoundManager MP3 List', 'sm'), __('MP3 list', 'sm'), 'admin_sm', 'sm_options', 'sm_pageOptions');
+function sm_adminMenu() {
+  add_options_page( __('SoundMachine', 'sm'), 
+                    __('MP3 list', 'sm'), 
+                    'admin_sm', 
+                    'sm_options', 
+                    'sm_pageOptions');
 }
 
-function load_now_list_in(&$properties, &$songs)
-{
+function load_now_list_in(&$properties, &$songs) {
   $songs = get_option('sm_songs');
   $properties = get_option('sm_properties');
 }
 
-function sm_save_the_playlist($properties, $songs){
+function sm_save_playlist($properties, $songs) {
   update_option('sm_songs', $songs);
   update_option('sm_properties', $properties);
 }
@@ -207,8 +200,7 @@ function sm_save_the_playlist($properties, $songs){
 $sm_message = '';
 $sm_status ='';
 
-function sm_pageOptions()
-{
+function sm_pageOptions() {
   global $sm_message, $sm_status;
   $sm_admin_base_url = get_option('siteurl') . '/wp-admin/admin.php?page=';
   
@@ -236,7 +228,7 @@ function sm_pageOptions()
     $properties['showPlaylist'] = $_POST['sm-show-playlist'];
     $properties['autoStart'] = $_POST['sm-auto-play'];
     
-    sm_save_the_playlist($properties, $songs);
+    sm_save_playlist($properties, $songs);
     
     $sm_message = __('Options saved', 'sm');
     $sm_status = 'updated';
