@@ -187,16 +187,6 @@ function sm_adminMenu() {
                     'sm_pageOptions');
 }
 
-function load_now_list_in(&$properties, &$songs) {
-  $songs = get_option('sm_songs');
-  $properties = get_option('sm_properties');
-}
-
-function sm_save_playlist($properties, $songs) {
-  update_option('sm_songs', $songs);
-  update_option('sm_properties', $properties);
-}
-
 $sm_message = '';
 $sm_status ='';
 
@@ -206,37 +196,79 @@ function sm_pageOptions() {
   
   $phpver = phpversion();
   
-  load_now_list_in($properties, $songs);
+  $songs = get_option('sm_songs');
+  $properties = get_option('sm_properties');
   
-  if ( isset($_POST['updateoptions']) ) {
-    $songs = array();
-    unset($songs);
-    $songs = array();
-    for($k = 0; $k < 15; $k++){
-      if($_POST["song-title-$k"] != '' && $_POST["song-path-$k"] != '')
-	{
-	  $songs[] = array('title'         => $_POST["song-title-$k"],
-			   'path'          => stripslashes($_POST["song-path-$k"]),
-			   'show_download' => $_POST["song-show_download-$k"],
-			   'buy_link'      => stripslashes($_POST["song-buy_link-$k"]),
-			   'album_cover'   => stripslashes($_POST["song-album_cover-$k"])
-			   );
-	}
+  if ( isset($_POST) ) {
+
+    // Create a new song
+    if ( $_POST['action'] == "create" ) {
+      $song = array('id'            => sizeof($songs) + 1,
+		    'title'         => $_POST["song-title"],
+		    'path'          => stripslashes($_POST["song-path"]),
+		    'show_download' => $_POST["song-show_download"],
+		    'buy_link'      => stripslashes($_POST["song-buy_link"]),
+		    'album_cover'   => stripslashes($_POST["song-album_cover"])
+		    );
+      $songs[] = $song;
+      update_option('sm_songs', $songs);      
     }
-    
-    $properties['showDisplay'] = $_POST['sm-show-dispay'];
-    $properties['showPlaylist'] = $_POST['sm-show-playlist'];
-    $properties['autoStart'] = $_POST['sm-auto-play'];
-    
-    sm_save_playlist($properties, $songs);
-    
+
+    // Update the properties of a song
+    if ( $_POST['action'] == "update" ) {
+      $id = $_POST['id'];
+      foreach($songs as &$song) {
+	if($song['id'] == $id) {
+	  $song['title'] = $_POST["song-title"];
+	  $song['path'] = $_POST["song-path"];
+	  $song['show_download'] = $_POST["song-show_download"];
+	  $song['buy_link'] = $_POST["song-buy_link"];
+	  break;
+	}
+      }
+    }
+
+    // Delete a song
+    if ( $_POST['action'] == "destroy" ) {
+      $id = $_POST['id'];
+
+      for($i = 0; $i < sizeof($songs); $i++) {
+	if($songs[$i]['id'] == $id) {
+	  unset($songs[$i]);
+	  break;
+	}
+      }
+
+      update_option('sm_songs', array_values($songs));
+    }
+
+    // Re-order the song list
+    if ( $_POST['action'] == "order" ) {
+      $ids = $_POST['ids'];
+      $sorted_songs = [];
+
+      foreach($ids as $id) {
+	foreach($songs as $song) {
+	  if($song['id'] == $id) { $sorted_songs[] = $song; break; }
+	}
+      }
+
+      update_option('sm_songs', $sorted_songs);
+    }
+
+    // Update the player options
+    if ( $_POST['action'] == "updateoptions" ) {
+      $properties['showDisplay'] = $_POST['sm-show-dispay'];
+      $properties['showPlaylist'] = $_POST['sm-show-playlist'];
+      $properties['autoStart'] = $_POST['sm-auto-play'];
+      update_option('sm_properties', $properties);
+    }
+
     $sm_message = __('Options saved', 'sm');
     $sm_status = 'updated';
   }
+
   sm_displayMessage();
-  $rows = count($songs);
-  $left = 10 - $rows;
-  $i=0;
   
   ?>
   <div class="wrap">
@@ -281,7 +313,7 @@ function sm_pageOptions() {
           <a href="#" onClick="condenseSongs(); return false;">Condense Song List</a>
         </p>
                   
-        <?php for($i = 0; $i < 15; $i++) { ?>
+        <?php for($i = 0; $i < sizeof($songs); $i++) { ?>
           <?php $song = $songs[$i]; ?>
           <div class="song-field">
             <div>
