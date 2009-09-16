@@ -245,7 +245,7 @@ function sm_pageOptions() {
     // Re-order the song list
     if ( $_POST['action'] == "order" ) {
       $ids = $_POST['ids'];
-      $sorted_songs = [];
+      $sorted_songs = array();
 
       foreach($ids as $id) {
 	foreach($songs as $song) {
@@ -281,11 +281,26 @@ function sm_pageOptions() {
             $media_upload_iframe_src = "media-upload.php?post_id=$uploading_iframe_ID";
             $audio_upload_iframe_src = apply_filters('audio_upload_iframe_src', "$media_upload_iframe_src&amp;type=audio");
             $audio_title = __('Add Audio');
-            
+
+	    $sm_url = get_option('siteurl')."/wp-content/plugins/soundmachine/js";
+	    wp_register_script( 'sm-admin', $sm_url, "sm-admin.js", array("jquery") );
           ?>
       </p>
 
+      <script>
+        function reloadSMScripts() {
+          var script = document.createElement('script');
+	  script.type = "text/javascript";
+	  script.url = "<?php echo get_option('siteurl'); ?>/wp-content/plugins/soundmachine/js/sm-admin.js";	  
+console.log(script);
+	  document.getElementsByTagName('head')[0].appendChild(script);
+	}
+      </script>
+
+      <div id="editor"></div>
+
       <script src="<?php echo get_option('siteurl'); ?>/wp-content/plugins/soundmachine/js/sm-admin.js" type="text/javascript"></script>
+      <script src="<?php echo get_option('siteurl'); ?>/wp-content/plugins/soundmachine/js/jquery.yql.js" type="text/javascript"></script>
 
       <link rel="stylesheet" href="<?php echo get_option('siteurl'); ?>/wp-content/plugins/soundmachine/css/sm-admin.css" type="text/css"></style>
         

@@ -1,4 +1,6 @@
-function send_to_editor(h) {
+var edCanvas = jQuery('#editor');
+
+function edInsertContent(element, h) {
   songPath = jQuery(h).attr('href');
   songTitle = jQuery(h).text();
   var songs = getSongs();
@@ -55,8 +57,20 @@ jQuery(document).ready(function() {
     var field = jQuery(this).parent().parent().parent().parent().parent();
     var title = field.find(".song-title").val();
     var searchString = title.replace(/\s/ig, "%2B");
-    var query = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Fwww.store.limewire.com%2Fstore%2Fapp%2Fpages%2Fsearch%2FSearchResultsAll%2FsearchQuery%2F"+searchString+"%2F%22%20and%0A%20%20%20%20%20%20xpath%3D'%2F%2Fdiv%5B%40id%3D%22bubble_albums%22%5D%2F%2Fa%5B%40class%3D%22title%22%5D'%0A%20%20%20%20&format=json&callback=?";
-    jQuery.getJSON(query, function(result) {
+
+    var query = "select * from html";
+    query += "    where url=\"http://www.amazon.com/s?ie=UTF8&tag=mozilla-20&index=blended&link_code=qs&field-keywords="+searchString+"&sourceid=Mozilla-search\"";
+    query += "    and xpath='//div[@class=\"productImage\"]/a/img'";
+
+    var params = {
+      q: query,
+      format: "json",
+      callback: "?"
+    };
+    console.log(params);
+
+    jQuery.getYQL(query, "json", function(result) {
+      console.log(result);
       if(result && result.query && result.query.results && result.query.results.a) {
 	var link = result.query.results.a[0];
         var albumName = link.span;
@@ -77,6 +91,8 @@ jQuery(document).ready(function() {
 	});
       }
     });
+
     return false;
   });
+
 });
